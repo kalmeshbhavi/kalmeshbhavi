@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	pb "github.com/kalmeshbhavi/shipper/consignment-service/proto/consignment"
+	vesselProto "github.com/kalmeshbhavi/shipper/vessel-service/proto/vessel"
 	"github.com/micro/go-micro"
-	"golang.org/x/net/context"
-	pb "github.com/kalmesh/shippercom/kalmesh/shipper/consignment-service/proto/consignment"
-)
 
-const port = ":50051"
+	"golang.org/x/net/context"
+)
 
 type IRepository interface {
 
@@ -31,6 +31,7 @@ func (repo *Repository) GetAll() []*pb.Consignment {
 
 type service struct {
 	repo IRepository
+	vesselClient vesselProto.VesselServiceClient
 }
 
 func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
@@ -58,9 +59,10 @@ func main() {
 		micro.Version("latest"),
 	)
 
+	vesselClient := vesselProto.NewVesselServiceClient("go.micro.srv.vessel", srv.Client())
 	srv.Init()
 
-	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo})
+	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, vesselClient})
 
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)

@@ -17,8 +17,10 @@ WORKDIR /go/src/github.com/kalmeshbhavi/shipper/consignment-service
 COPY . .
 
 RUN go get -u github.com/golang/dep/cmd/dep
+COPY Gopkg.toml Gopkg.lock ./
+RUN dep ensure -v -vendor-only
 
-RUN dep init && dep ensure
+#RUN go get -u github.com/golang/protobuf/protoc-gen-go
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo .
 
